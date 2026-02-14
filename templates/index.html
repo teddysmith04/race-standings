@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Team Standings</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 40px;
+            background: #111;
+            color: white;
+        }
+        h1 { font-size: 40px; }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 30px;
+            font-size: 22px;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        th { border-bottom: 2px solid white; }
+        tr:nth-child(even) { background: #222; }
+        .gold { color: gold; }
+        .silver { color: silver; }
+        .bronze { color: #cd7f32; }
+        .countdown { margin-top: 15px; color: #aaa; }
+    </style>
+</head>
+<body>
+
+<h1>Live Team Standings</h1>
+<div class="countdown">
+    Refreshing in <span id="countdown">15</span>s
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rank</th>
+            <th>Team</th>
+            <th>Total Time</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+</table>
+
+<script>
+const REFRESH_INTERVAL = 15;
+let countdown = REFRESH_INTERVAL;
+
+async function loadStandings() {
+    const response = await fetch("/standings");
+    const data = await response.json();
+
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    data.forEach((team, i) => {
+        let medalClass = "";
+        if (i === 0) medalClass = "gold";
+        if (i === 1) medalClass = "silver";
+        if (i === 2) medalClass = "bronze";
+
+        tbody.innerHTML += `
+            <tr class="${medalClass}">
+                <td>${i+1}</td>
+                <td>${team.team}</td>
+                <td>${team.total}</td>
+            </tr>
+        `;
+    });
+}
+
+setInterval(() => {
+    countdown--;
+    if (countdown <= 0) {
+        loadStandings();
+        countdown = REFRESH_INTERVAL;
+    }
+    document.getElementById("countdown").innerText = countdown;
+}, 1000);
+
+loadStandings();
+</script>
+
+</body>
+</html>
